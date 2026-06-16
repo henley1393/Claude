@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steel Erection Quote Calculator — Perth</title>
+<style>
+  :root{
+    --bg:#0f1720; --panel:#fff; --ink:#1b2733; --muted:#6b7886;
+    --line:#dde3ea; --brand:#c8511b; --brand-dark:#9c3d12;
+    --accent:#0d5c63; --good:#1e7a4d; --warn:#b4690e; --bad:#b3261e;
+    --soft:#f4f6f8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:#eef1f4;line-height:1.45}
+  header.app{background:linear-gradient(135deg,#1b2733,#2c3e4f);color:#fff;padding:18px 22px}
+  header.app h1{margin:0;font-size:1.35rem;letter-spacing:.2px}
+  header.app p{margin:4px 0 0;color:#aebccb;font-size:.85rem}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start}
+  @media (max-width:960px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:18px;
+    box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  .panel h2{margin:0 0 4px;font-size:1rem;display:flex;align-items:center;gap:8px}
+  .panel .hint{color:var(--muted);font-size:.78rem;margin:0 0 14px}
+  fieldset{border:0;padding:0;margin:0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid.three{grid-template-columns:1fr 1fr 1fr}
+  .full{grid-column:1/-1}
+  label{display:block;font-size:.74rem;font-weight:600;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.4px;margin-bottom:4px}
+  input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;
+    font-size:.92rem;font-family:inherit;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+  textarea{resize:vertical;min-height:62px}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;
+    padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .sec-head h3{margin:0;font-size:.95rem}
+  .toggle{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:600;color:var(--muted);
+    text-transform:none;letter-spacing:0;cursor:pointer;user-select:none}
+  .toggle input{width:auto}
+  .addon[data-on="false"] .addon-body{display:none}
+  .addon[data-on="false"]{opacity:.72}
+  .prefix{position:relative}
+  .prefix>span{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem;pointer-events:none}
+  .prefix input{padding-left:22px}
+  .suffix-note{font-size:.72rem;color:var(--muted);margin-top:3px}
+  button{font-family:inherit;cursor:pointer;border:0;border-radius:8px;font-weight:600}
+  .btn{background:var(--brand);color:#fff;padding:10px 16px;font-size:.9rem}
+  .btn:hover{background:var(--brand-dark)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--soft)}
+  .btn.sm{padding:6px 11px;font-size:.8rem}
+  .items table{width:100%;border-collapse:collapse;font-size:.86rem}
+  .items th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:4px 6px}
+  .items td{padding:3px 6px}
+  .items input{padding:7px 8px}
+  .items .x{background:#fff;border:1px solid var(--line);color:var(--bad);width:30px;padding:6px 0;border-radius:7px}
+  .items .x:hover{background:#fdecea}
+
+  /* sidebar summary */
+  .sidebar{position:sticky;top:20px}
+  .summary .row{display:flex;justify-content:space-between;padding:6px 0;font-size:.9rem;border-bottom:1px dashed var(--line)}
+  .summary .row span:last-child{font-variant-numeric:tabular-nums;font-weight:600}
+  .summary .row.muted span{color:var(--muted);font-weight:500}
+  .summary .row.sub{border-bottom:1px solid var(--ink);font-weight:700}
+  .summary .row.total{border:0;font-size:1.5rem;font-weight:800;margin-top:8px}
+  .summary .row.total span:last-child{color:var(--brand)}
+  .pertonne{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px;margin:12px 0;text-align:center}
+  .pertonne b{font-size:1.7rem;display:block;color:var(--accent);font-variant-numeric:tabular-nums}
+  .pertonne small{color:var(--muted);font-size:.76rem}
+  .flag{font-size:.8rem;border-radius:8px;padding:9px 11px;margin-top:10px;display:none}
+  .flag.show{display:block}
+  .flag.ok{background:#e8f5ee;color:var(--good)}
+  .flag.low{background:#fef3e2;color:var(--warn)}
+  .flag.high{background:#fdecea;color:var(--bad)}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .saved{margin-top:12px;display:flex;gap:8px}
+  .saved select{flex:1}
+
+  /* print quote (hidden on screen) */
+  .quote{display:none}
+  @media print{
+    body{background:#fff}
+    .app,.wrap>.col-form,.sidebar,header.app,.no-print{display:none !important}
+    .wrap{display:block;max-width:none;padding:0;margin:0}
+    .quote{display:block;padding:0;color:#000;font-size:12px}
+  }
+  /* on-screen preview of quote */
+  .quote.preview{display:block;background:#fff;color:#1b2733}
+  .quote-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--brand);padding-bottom:14px;margin-bottom:18px}
+  .quote-head h2{margin:0;font-size:1.5rem;color:var(--brand)}
+  .quote-head .co{font-size:.85rem;color:var(--muted);margin-top:4px;white-space:pre-line}
+  .quote-meta{text-align:right;font-size:.85rem}
+  .quote-meta div{margin:2px 0}
+  .quote-meta b{color:var(--ink)}
+  .quote-parties{display:flex;gap:30px;margin-bottom:16px;font-size:.88rem}
+  .quote-parties h4{margin:0 0 4px;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  table.qt{width:100%;border-collapse:collapse;margin:6px 0 14px;font-size:.9rem}
+  table.qt th{background:var(--soft);text-align:left;padding:9px 10px;font-size:.74rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);border-bottom:1px solid var(--line)}
+  table.qt th.num,table.qt td.num{text-align:right;font-variant-numeric:tabular-nums}
+  table.qt td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.qt td .desc-sub{display:block;color:var(--muted);font-size:.8rem}
+  table.qt tfoot td{border:0;padding:5px 10px}
+  table.qt tfoot tr.grand td{font-size:1.15rem;font-weight:800;border-top:2px solid var(--ink);padding-top:9px}
+  table.qt tfoot tr.grand td.num{color:var(--brand)}
+  .quote-terms{font-size:.82rem;color:#33414f;white-space:pre-line;border-top:1px solid var(--line);padding-top:12px;margin-top:6px}
+  .quote-valid{font-weight:700;margin:4px 0 14px;font-size:.9rem}
+  .mini{font-size:.78rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="app">
+  <h1>🏗️ Steel Erection Quote Calculator</h1>
+  <p>Per-tonne pricing for structural steel erection &amp; rigging — Perth metro · all figures AUD</p>
+</header>
+
+<div class="wrap">
+  <!-- ============ FORM COLUMN ============ -->
+  <div class="col-form">
+
+    <!-- Job & client -->
+    <div class="panel">
+      <h2>Job &amp; client details</h2>
+      <p class="hint">Appears on the printable quote.</p>
+      <fieldset class="grid">
+        <div><label>Your company</label><input id="coName" value="Your Rigging Co."></div>
+        <div><label>ABN</label><input id="coAbn" placeholder="00 000 000 000"></div>
+        <div class="full"><label>Company address / contact</label><input id="coContact" placeholder="Unit 1, 10 Steel St, Welshpool WA 6106 · 08 0000 0000 · email"></div>
+        <div><label>Quote number</label><input id="quoteNo"></div>
+        <div><label>Quote date</label><input id="quoteDate" type="date"></div>
+        <div><label>Client / company</label><input id="clientName" placeholder="ABC Constructions Pty Ltd"></div>
+        <div><label>Valid for (days)</label><input id="validDays" type="number" min="0" value="30"></div>
+        <div class="full"><label>Project / site address</label><input id="projectName" placeholder="New warehouse — 5 Example Rd, Canning Vale WA"></div>
+      </fieldset>
+    </div>
+
+    <!-- Core per-tonne -->
+    <div class="panel">
+      <h2>1 · Structural steel erection (per tonne)</h2>
+      <p class="hint">Core price = tonnage × your erection rate. Pick a complexity preset or enter your own rate.</p>
+      <fieldset class="grid three">
+        <div><label>Steel tonnage (t)</label><input id="tonnage" type="number" min="0" step="0.1" value="25"></div>
+        <div>
+          <label>Complexity preset</label>
+          <select id="complexity">
+            <option value="450">Simple — portal frame / shed</option>
+            <option value="700" selected>Standard — industrial / commercial</option>
+            <option value="1100">Complex — multi-storey / heavy</option>
+            <option value="">Custom (enter rate →)</option>
+          </select>
+        </div>
+        <div><label>Erection rate ($/tonne)</label>
+          <div class="prefix"><span>$</span><input id="rate" type="number" min="0" step="10" value="700"></div>
+        </div>
+      </fieldset>
+    </div>
+
+    <!-- Crane -->
+    <div class="panel addon" id="addon-crane" data-on="true">
+      <div class="sec-head">
+        <h3>2 · Mobile craneage</h3>
+        <label class="toggle"><input type="checkbox" class="addon-switch" data-target="addon-crane" checked> include</label>
+      </div>
+      <div class="addon-body">
+        <p class="hint">Add when craneage isn't already built into your per-tonne rate, or for extra/larger cranes.</p>
+        <fieldset class="grid three">
+          <div><label>Crane size preset</label>
+            <select id="cranePreset">
+              <option value="190">20–25 t city crane</option>
+              <option value="270" selected>50–55 t</option>
+              <option value="360">70–100 t</option>
+              <option value="">Custom</option>
+            </select>
+          </div>
+          <div><label>Wet rate ($/hr)</label><div class="prefix"><span>$</span><input id="craneRate" type="number" min="0" step="5" value="270"></div></div>
+          <div><label>Mob / demob ($)</label><div class="prefix"><span>$</span><input id="craneMob" type="number" min="0" step="50" value="600"></div></div>
+          <div><label>Days on site</label><input id="craneDays" type="number" min="0" step="0.5" value="2"></div>
+          <div><label>Hours per day</label><input id="craneHours" type="number" min="0" step="0.5" value="8"></div>
+          <div><label>&nbsp;</label><div class="mini" id="craneCalc"></div></div>
+        </fieldset>
+      </div>
+    </div>
+
+    <!-- Labour -->
+    <div class="panel addon" id="addon-labour" data-on="false">
+      <div class="sec-head">
+        <h3>3 · Additional labour</h3>
+        <label class="toggle"><input type="checkbox" class="addon-switch" data-target="addon-labour"> include</label>
+      </div>
+      <div class="addon-body">
+        <p class="hint">Extra crew, supervision or dogging beyond the per-tonne rate. Charge-out incl. on-costs.</p>
+        <fieldset class="grid three">
+          <div><label>Workers</label><input id="labWorkers" type="number" min="0" value="2"></div>
+          <div><label>Days</label><input id="labDays" type="number" min="0" step="0.5" value="2"></div>
+          <div><label>Hours per day</label><input id="labHours" type="number" min="0" step="0.5" value="8"></div>
+          <div><label>Charge-out ($/hr)</label><div class="prefix"><span>$</span><input id="labRate" type="number" min="0" step="5" value="95"></div></div>
+          <div class="full"><label>Description (for quote)</label><input id="labDesc" value="Additional rigging crew"></div>
+        </fieldset>
+      </div>
+    </div>
+
+    <!-- Access / EWP -->
+    <div class="panel addon" id="addon-access" data-on="false">
+      <div class="sec-head">
+        <h3>4 · Access equipment / EWP</h3>
+        <label class="toggle"><input type="checkbox" class="addon-switch" data-target="addon-access"> include</label>
+      </div>
+      <div class="addon-body">
+        <fieldset class="grid three">
+          <div class="full"><label>Type / description</label><input id="accDesc" value="Boom lift (EWP)"></div>
+          <div><label>Days</label><input id="accDays" type="number" min="0" step="0.5" value="2"></div>
+          <div><label>Daily rate ($)</label><div class="prefix"><span>$</span><input id="accRate" type="number" min="0" step="10" value="120"></div></div>
+          <div><label>Delivery / pickup ($)</label><div class="prefix"><span>$</span><input id="accDelivery" type="number" min="0" step="10" value="250"></div></div>
+        </fieldset>
+      </div>
+    </div>
+
+    <!-- Travel / site -->
+    <div class="panel addon" id="addon-travel" data-on="false">
+      <div class="sec-head">
+        <h3>5 · Travel &amp; site establishment</h3>
+        <label class="toggle"><input type="checkbox" class="addon-switch" data-target="addon-travel"> include</label>
+      </div>
+      <div class="addon-body">
+        <p class="hint">Crew travel allowance across the Perth metro + any equipment float / establishment.</p>
+        <fieldset class="grid three">
+          <div><label>Crew-days</label><input id="travDays" type="number" min="0" step="0.5" value="2"></div>
+          <div><label>Daily allowance ($)</label><div class="prefix"><span>$</span><input id="travRate" type="number" min="0" step="10" value="90"></div></div>
+          <div><label>Float / establishment ($)</label><div class="prefix"><span>$</span><input id="travEstab" type="number" min="0" step="50" value="0"></div></div>
+        </fieldset>
+      </div>
+    </div>
+
+    <!-- Consumables -->
+    <div class="panel addon" id="addon-consum" data-on="true">
+      <div class="sec-head">
+        <h3>6 · Consumables &amp; sundries</h3>
+        <label class="toggle"><input type="checkbox" class="addon-switch" data-target="addon-consum" checked> include</label>
+      </div>
+      <div class="addon-body">
+        <p class="hint">Bolts, welding, grinding discs, gas, etc. Rate per tonne plus any flat sundries.</p>
+        <fieldset class="grid">
+          <div><label>Consumables ($/tonne)</label><div class="prefix"><span>$</span><input id="consPerT" type="number" min="0" step="5" value="30"></div></div>
+          <div><label>Flat sundries ($)</label><div class="prefix"><span>$</span><input id="consFlat" type="number" min="0" step="10" value="0"></div></div>
+        </fieldset>
+      </div>
+    </div>
+
+    <!-- Custom line items -->
+    <div class="panel items">
+      <h2>7 · Custom line items</h2>
+      <p class="hint">Anything else — traffic management, engineering, certs, hire, etc.</p>
+      <table>
+        <thead><tr><th style="width:50%">Description</th><th>Qty</th><th>Unit $</th><th class="num">Line $</th><th></th></tr></thead>
+        <tbody id="customRows"></tbody>
+      </table>
+      <button class="btn ghost sm" id="addRow" style="margin-top:8px">+ Add line item</button>
+    </div>
+
+    <!-- Commercials -->
+    <div class="panel">
+      <h2>8 · Commercials</h2>
+      <p class="hint">Margin &amp; contingency apply to the direct cost subtotal. GST applies to the ex-GST total.</p>
+      <fieldset class="grid three">
+        <div><label>Overhead &amp; margin (%)</label><input id="margin" type="number" min="0" step="0.5" value="20"></div>
+        <div><label>Contingency (%)</label><input id="contingency" type="number" min="0" step="0.5" value="5"></div>
+        <div><label>GST (%)</label><input id="gst" type="number" min="0" step="0.5" value="10"></div>
+      </fieldset>
+    </div>
+
+    <!-- Terms -->
+    <div class="panel">
+      <h2>Terms &amp; notes</h2>
+      <p class="hint">Shown at the bottom of the printable quote.</p>
+      <textarea id="terms">Price excludes supply &amp; fabrication of steel unless noted. Assumes clear, level site access and crane standing area. Out-of-hours work, rework due to others, and delays beyond our control charged as variations. Payment 14 days from invoice.</textarea>
+    </div>
+
+  </div><!-- /col-form -->
+
+  <!-- ============ SIDEBAR SUMMARY ============ -->
+  <aside class="sidebar">
+    <div class="panel summary">
+      <h2>Quote summary</h2>
+      <div class="row muted"><span>Steel erection (<span id="sTonnage">0</span> t @ $<span id="sRate">0</span>/t)</span><span id="cErect">$0</span></div>
+      <div class="row muted" data-line="crane"><span>Craneage</span><span id="cCrane">$0</span></div>
+      <div class="row muted" data-line="labour"><span>Additional labour</span><span id="cLabour">$0</span></div>
+      <div class="row muted" data-line="access"><span>Access / EWP</span><span id="cAccess">$0</span></div>
+      <div class="row muted" data-line="travel"><span>Travel &amp; site</span><span id="cTravel">$0</span></div>
+      <div class="row muted" data-line="consum"><span>Consumables</span><span id="cConsum">$0</span></div>
+      <div class="row muted" data-line="custom"><span>Custom items</span><span id="cCustom">$0</span></div>
+      <div class="row sub"><span>Direct cost</span><span id="cDirect">$0</span></div>
+      <div class="row muted"><span>Overhead &amp; margin (<span id="sMargin">0</span>%)</span><span id="cMargin">$0</span></div>
+      <div class="row muted"><span>Contingency (<span id="sCont">0</span>%)</span><span id="cCont">$0</span></div>
+      <div class="row sub"><span>Subtotal (ex GST)</span><span id="cExGst">$0</span></div>
+      <div class="row muted"><span>GST (<span id="sGst">0</span>%)</span><span id="cGst">$0</span></div>
+      <div class="row total"><span>Total</span><span id="cTotal">$0</span></div>
+
+      <div class="pertonne">
+        <b id="effPerT">$0/t</b>
+        <small>effective all-in rate (inc GST) · <span id="effPerTex">$0/t</span> ex GST</small>
+      </div>
+      <div class="flag" id="flag"></div>
+
+      <div class="actions">
+        <button class="btn" id="printBtn">🖨️ Print / PDF quote</button>
+        <button class="btn ghost" id="previewBtn">Preview quote</button>
+      </div>
+      <div class="actions">
+        <button class="btn ghost sm" id="saveBtn">💾 Save quote</button>
+        <button class="btn ghost sm" id="newBtn">＋ New</button>
+      </div>
+      <div class="saved">
+        <select id="savedList"><option value="">— saved quotes —</option></select>
+        <button class="btn ghost sm" id="loadBtn">Load</button>
+        <button class="btn ghost sm" id="delBtn">Delete</button>
+      </div>
+      <p class="mini" style="margin-top:10px">Quotes &amp; your rates are saved in this browser only. Indicative tool — confirm against actuals.</p>
+    </div>
+  </aside>
+</div>
+
+<!-- ============ PRINTABLE QUOTE ============ -->
+<div class="quote" id="quote"></div>
+
+<script>
+const AUD = new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:2});
+const num = id => parseFloat(document.getElementById(id).value)||0;
+const val = id => document.getElementById(id).value;
+const set = (id,v) => {const e=document.getElementById(id); if(e) e.textContent=v;};
+const PERTONNE_BAND = [400,1500]; // typical Perth erection-only ex-GST $/t
+
+/* ---------- custom line items ---------- */
+const rowsBody = document.getElementById('customRows');
+function addRow(desc='',qty='',unit=''){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class="ci-desc" value="${desc}"></td>
+    <td><input class="ci-qty" type="number" min="0" step="0.5" value="${qty}"></td>
+    <td><input class="ci-unit" type="number" min="0" step="1" value="${unit}"></td>
+    <td class="num ci-line">$0</td>
+    <td><button class="x" title="Remove">✕</button></td>`;
+  tr.querySelector('.x').onclick=()=>{tr.remove();recalc();};
+  tr.querySelectorAll('input').forEach(i=>i.addEventListener('input',recalc));
+  rowsBody.appendChild(tr);
+}
+function customItems(){
+  return [...rowsBody.children].map(tr=>{
+    const desc=tr.querySelector('.ci-desc').value;
+    const qty=parseFloat(tr.querySelector('.ci-qty').value)||0;
+    const unit=parseFloat(tr.querySelector('.ci-unit').value)||0;
+    const line=qty*unit;
+    tr.querySelector('.ci-line').textContent=AUD.format(line);
+    return {desc,qty,unit,line};
+  }).filter(r=>r.line>0 || r.desc.trim());
+}
+
+/* ---------- presets ---------- */
+document.getElementById('complexity').addEventListener('change',e=>{
+  if(e.target.value){document.getElementById('rate').value=e.target.value;recalc();}
+});
+document.getElementById('cranePreset').addEventListener('change',e=>{
+  if(e.target.value){document.getElementById('craneRate').value=e.target.value;recalc();}
+});
+
+/* ---------- addon toggles ---------- */
+document.querySelectorAll('.addon-switch').forEach(sw=>{
+  sw.addEventListener('change',()=>{
+    document.getElementById(sw.dataset.target).dataset.on=sw.checked;
+    recalc();
+  });
+});
+const on = id => document.getElementById(id).dataset.on==='true';
+
+/* ---------- core calc ---------- */
+function compute(){
+  const tonnage=num('tonnage'), rate=num('rate');
+  const erection=tonnage*rate;
+
+  const craneHrs=num('craneDays')*num('craneHours');
+  const crane=on('addon-crane') ? craneHrs*num('craneRate')+num('craneMob') : 0;
+  set('craneCalc', on('addon-crane') ? `${craneHrs} hr × ${AUD.format(num('craneRate'))} + ${AUD.format(num('craneMob'))} mob` : '');
+
+  const labour=on('addon-labour') ? num('labWorkers')*num('labDays')*num('labHours')*num('labRate') : 0;
+  const access=on('addon-access') ? num('accDays')*num('accRate')+num('accDelivery') : 0;
+  const travel=on('addon-travel') ? num('travDays')*num('travRate')+num('travEstab') : 0;
+  const consum=on('addon-consum') ? tonnage*num('consPerT')+num('consFlat') : 0;
+  const items=customItems();
+  const custom=items.reduce((s,r)=>s+r.line,0);
+
+  const direct=erection+crane+labour+access+travel+consum+custom;
+  const mPct=num('margin'), cPct=num('contingency'), gPct=num('gst');
+  const margin=direct*mPct/100;
+  const cont=direct*cPct/100;
+  const exGst=direct+margin+cont;
+  const gst=exGst*gPct/100;
+  const total=exGst+gst;
+  const load = direct>0 ? exGst/direct : 1; // fold margin+contingency into client line prices
+
+  return {tonnage,rate,erection,crane,labour,access,travel,consum,custom,items,
+    direct,margin,cont,exGst,gst,total,load,mPct,cPct,gPct,
+    perTinc: tonnage>0?total/tonnage:0, perTex: tonnage>0?exGst/tonnage:0};
+}
+
+function recalc(){
+  const r=compute();
+  set('sTonnage', r.tonnage); set('sRate', r.rate.toLocaleString('en-AU'));
+  set('cErect',AUD.format(r.erection));
+  set('cCrane',AUD.format(r.crane)); set('cLabour',AUD.format(r.labour));
+  set('cAccess',AUD.format(r.access)); set('cTravel',AUD.format(r.travel));
+  set('cConsum',AUD.format(r.consum)); set('cCustom',AUD.format(r.custom));
+  set('cDirect',AUD.format(r.direct));
+  set('sMargin',r.mPct); set('cMargin',AUD.format(r.margin));
+  set('sCont',r.cPct); set('cCont',AUD.format(r.cont));
+  set('cExGst',AUD.format(r.exGst));
+  set('sGst',r.gPct); set('cGst',AUD.format(r.gst));
+  set('cTotal',AUD.format(r.total));
+  set('effPerT', (r.tonnage>0?AUD.format(r.perTinc):'—')+'/t');
+  set('effPerTex', (r.tonnage>0?AUD.format(r.perTex):'—')+'/t');
+
+  // hide unused summary lines
+  const showIf=(line,cond)=>{const el=document.querySelector(`[data-line="${line}"]`); if(el) el.style.display=cond?'':'none';};
+  showIf('crane',on('addon-crane')); showIf('labour',on('addon-labour'));
+  showIf('access',on('addon-access')); showIf('travel',on('addon-travel'));
+  showIf('consum',on('addon-consum')); showIf('custom',r.custom>0);
+
+  // sanity flag
+  const flag=document.getElementById('flag');
+  if(r.tonnage<=0){flag.className='flag';}
+  else if(r.perTex<PERTONNE_BAND[0]){flag.className='flag show low';
+    flag.textContent=`⚠ Effective ${AUD.format(r.perTex)}/t (ex GST) is below the typical Perth band (${AUD.format(PERTONNE_BAND[0])}–${AUD.format(PERTONNE_BAND[1])}/t). Check you've covered all costs.`;}
+  else if(r.perTex>PERTONNE_BAND[1]){flag.className='flag show high';
+    flag.textContent=`⚠ Effective ${AUD.format(r.perTex)}/t (ex GST) is above the typical band — fine for complex/small jobs, but worth a sanity check.`;}
+  else{flag.className='flag show ok';
+    flag.textContent=`✓ Effective ${AUD.format(r.perTex)}/t (ex GST) sits within the typical Perth erection band.`;}
+
+  buildQuote(r);
+  autosave();
+}
+
+/* ---------- printable quote ---------- */
+function fmtDate(d){return d? new Date(d+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}) : '';}
+function validUntil(){
+  const d=val('quoteDate'); if(!d) return '';
+  const dt=new Date(d+'T00:00:00'); dt.setDate(dt.getDate()+ (num('validDays')||0));
+  return dt.toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'});
+}
+function buildQuote(r){
+  const L=r.load;
+  const lines=[];
+  if(r.erection>0) lines.push([`Structural steel erection`,`${r.tonnage} t @ ${AUD.format(r.perTex)}/t`,r.erection*L]);
+  if(r.crane>0)   lines.push([`Mobile craneage`,`${num('craneDays')} day(s) incl. mobilisation`,r.crane*L]);
+  if(r.labour>0)  lines.push([val('labDesc')||'Additional labour',`${num('labWorkers')} crew × ${num('labDays')} day(s)`,r.labour*L]);
+  if(r.access>0)  lines.push([val('accDesc')||'Access equipment',`${num('accDays')} day(s) incl. delivery`,r.access*L]);
+  if(r.travel>0)  lines.push([`Travel & site establishment`,`Perth metro`,r.travel*L]);
+  if(r.consum>0)  lines.push([`Consumables & sundries`,``,r.consum*L]);
+  r.items.forEach(it=>{ if(it.line>0) lines.push([it.desc||'Item',`${it.qty} × ${AUD.format(it.unit)}`,it.line*L]); });
+
+  const rowsHtml=lines.map(([d,sub,amt])=>
+    `<tr><td>${esc(d)}${sub?`<span class="desc-sub">${esc(sub)}</span>`:''}</td><td class="num">${AUD.format(amt)}</td></tr>`).join('');
+
+  document.getElementById('quote').innerHTML=`
+    <div class="quote-head">
+      <div>
+        <h2>QUOTATION</h2>
+        <div class="co">${esc(val('coName'))}${val('coAbn')?`\nABN ${esc(val('coAbn'))}`:''}${val('coContact')?`\n${esc(val('coContact'))}`:''}</div>
+      </div>
+      <div class="quote-meta">
+        <div><b>Quote #:</b> ${esc(val('quoteNo'))}</div>
+        <div><b>Date:</b> ${fmtDate(val('quoteDate'))}</div>
+      </div>
+    </div>
+    <div class="quote-parties">
+      <div><h4>Prepared for</h4>${esc(val('clientName'))||'—'}</div>
+      <div><h4>Project</h4>${esc(val('projectName'))||'—'}</div>
+      <div><h4>Scope</h4>${r.tonnage} t structural steel erection</div>
+    </div>
+    <table class="qt">
+      <thead><tr><th>Description</th><th class="num">Amount (ex GST)</th></tr></thead>
+      <tbody>${rowsHtml||'<tr><td colspan="2">No items.</td></tr>'}</tbody>
+      <tfoot>
+        <tr><td class="num">Subtotal (ex GST)</td><td class="num">${AUD.format(r.exGst)}</td></tr>
+        <tr><td class="num">GST (${r.gPct}%)</td><td class="num">${AUD.format(r.gst)}</td></tr>
+        <tr class="grand"><td class="num">Total (inc GST)</td><td class="num">${AUD.format(r.total)}</td></tr>
+      </tfoot>
+    </table>
+    ${validUntil()?`<div class="quote-valid">Valid until ${validUntil()}</div>`:''}
+    <div class="quote-terms">${esc(val('terms'))}</div>`;
+}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------- preview toggle ---------- */
+document.getElementById('previewBtn').addEventListener('click',()=>{
+  const q=document.getElementById('quote');
+  q.classList.toggle('preview');
+  document.getElementById('previewBtn').textContent=q.classList.contains('preview')?'Hide preview':'Preview quote';
+  if(q.classList.contains('preview')) q.scrollIntoView({behavior:'smooth'});
+});
+document.getElementById('printBtn').addEventListener('click',()=>window.print());
+
+/* ---------- persistence ---------- */
+const FIELDS=['coName','coAbn','coContact','quoteNo','quoteDate','clientName','validDays','projectName',
+  'tonnage','complexity','rate','cranePreset','craneRate','craneMob','craneDays','craneHours',
+  'labWorkers','labDays','labHours','labRate','labDesc','accDesc','accDays','accRate','accDelivery',
+  'travDays','travRate','travEstab','consPerT','consFlat','margin','contingency','gst','terms'];
+const SWITCHES=['addon-crane','addon-labour','addon-access','addon-travel','addon-consum'];
+
+function gather(){
+  const o={f:{},sw:{},items:[]};
+  FIELDS.forEach(id=>o.f[id]=val(id));
+  SWITCHES.forEach(id=>o.sw[id]=on(id));
+  o.items=[...rowsBody.children].map(tr=>({
+    desc:tr.querySelector('.ci-desc').value,
+    qty:tr.querySelector('.ci-qty').value,
+    unit:tr.querySelector('.ci-unit').value}));
+  return o;
+}
+function apply(o){
+  FIELDS.forEach(id=>{if(o.f[id]!==undefined)document.getElementById(id).value=o.f[id];});
+  SWITCHES.forEach(id=>{
+    const checked=!!(o.sw&&o.sw[id]);
+    document.querySelector(`.addon-switch[data-target="${id}"]`).checked=checked;
+    document.getElementById(id).dataset.on=checked;
+  });
+  rowsBody.innerHTML='';
+  (o.items||[]).forEach(it=>addRow(it.desc,it.qty,it.unit));
+  recalc();
+}
+function autosave(){localStorage.setItem('rqc_autosave',JSON.stringify(gather()));}
+
+const QKEY='rqc_quotes';
+function getQuotes(){try{return JSON.parse(localStorage.getItem(QKEY))||{};}catch(e){return {};}}
+function refreshList(sel){
+  const q=getQuotes(); const list=document.getElementById('savedList');
+  list.innerHTML='<option value="">— saved quotes —</option>'+
+    Object.keys(q).sort().map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join('');
+  if(sel) list.value=sel;
+}
+document.getElementById('saveBtn').addEventListener('click',()=>{
+  const def=val('quoteNo')||val('clientName')||'Quote';
+  const name=prompt('Save quote as:',def); if(!name)return;
+  const q=getQuotes(); q[name]=gather(); localStorage.setItem(QKEY,JSON.stringify(q));
+  refreshList(name);
+});
+document.getElementById('loadBtn').addEventListener('click',()=>{
+  const name=val('savedList'); if(!name)return;
+  const q=getQuotes(); if(q[name])apply(q[name]);
+});
+document.getElementById('delBtn').addEventListener('click',()=>{
+  const name=val('savedList'); if(!name)return;
+  if(!confirm(`Delete saved quote "${name}"?`))return;
+  const q=getQuotes(); delete q[name]; localStorage.setItem(QKEY,JSON.stringify(q));
+  refreshList();
+});
+document.getElementById('newBtn').addEventListener('click',()=>{
+  if(!confirm('Start a new blank quote? Current unsaved entries will clear.'))return;
+  localStorage.removeItem('rqc_autosave'); location.reload();
+});
+
+/* ---------- init ---------- */
+function todayISO(){return new Date().toISOString().slice(0,10);}
+function defaultQuoteNo(){
+  const d=new Date(); const s=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  return 'Q-'+s+'-01';
+}
+document.getElementById('addRow').addEventListener('click',()=>{addRow();recalc();});
+document.querySelectorAll('input,select,textarea').forEach(el=>{
+  el.addEventListener('input',recalc); el.addEventListener('change',recalc);
+});
+
+(function init(){
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem('rqc_autosave'));}catch(e){}
+  if(saved){apply(saved);}
+  else{
+    document.getElementById('quoteDate').value=todayISO();
+    document.getElementById('quoteNo').value=defaultQuoteNo();
+    addRow(); recalc();
+  }
+  refreshList();
+})();
+</script>
+</body>
+</html>
